@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Odontogram — FDI Chart</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+/* ─── Reset & tokens ───────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --ink:        #0E1117;
+  --ink-soft:   #3D4350;
+  --ink-muted:  #6B7280;
+  --ink-faint:  #9CA3AF;
+  --surface:    #FFFFFF;
+  --surface-2:  #F7F8FA;
+  --surface-3:  #EDEEF2;
+  --border:     #E4E6EC;
+  --border-strong: #C8CBD6;
+  --accent:     #0EA5A0;
+  --accent-soft:#E0F7F6;
+  --accent-dark:#0C8A86;
+  --radius-sm:  6px;
+  --radius:     10px;
+  --radius-lg:  16px;
+  --radius-xl:  22px;
+  --shadow-sm:  0 1px 3px rgba(14,21,23,.06), 0 1px 2px rgba(14,21,23,.04);
+  --shadow:     0 4px 16px rgba(14,21,23,.08), 0 1px 4px rgba(14,21,23,.04);
+  --shadow-lg:  0 16px 48px rgba(14,21,23,.12), 0 4px 12px rgba(14,21,23,.06);
+  --font-display: 'Syne', sans-serif;
+  --font-mono:    'DM Mono', monospace;
+}
+
+html { font-size: 14px; }
+body {
+  font-family: var(--font-display);
+  background: var(--surface-2);
+  color: var(--ink);
+  min-height: 100vh;
+  line-height: 1.5;
+}
+
+/* ─── Layout ───────────────────────────────────────────────────────────────── */
+.app {
+  max-width: 1100px;
+  margin: 0 auto;
+  padding: 32px 20px 60px;
+}
+
+/* ─── Header ───────────────────────────────────────────────────────────────── */
+.header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-bottom: 28px;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+.header-left {}
+.brand {
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+  color: var(--accent);
+  margin-bottom: 4px;
+}
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: var(--ink);
+  letter-spacing: -.5px;
+  line-height: 1;
+}
+.page-title span { color: var(--accent); }
+
+/* Patient strip */
+.patient-strip {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 10px 16px;
+  box-shadow: var(--shadow-sm);
+}
+.patient-avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  background: var(--accent);
+  color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 600;
+  flex-shrink: 0;
+}
+.patient-name { font-size: 14px; font-weight: 600; color: var(--ink); }
+.patient-meta { font-size: 11px; color: var(--ink-muted); margin-top: 1px; font-family: var(--font-mono); }
+
+/* ─── Toolbar ──────────────────────────────────────────────────────────────── */
+.toolbar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+
+.mode-toggle {
+  display: inline-flex;
+  background: var(--surface-3);
+  border-radius: var(--radius);
+  padding: 3px;
+  gap: 2px;
+}
+.mode-btn {
+  padding: 7px 18px;
+  border-radius: 8px;
+  border: none;
+  font-family: var(--font-display);
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  letter-spacing: .03em;
+  transition: all .2s;
+  background: transparent;
+  color: var(--ink-muted);
+}
+.mode-btn.active {
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-sm);
+}
+
+.filter-pills { display: flex; gap: 6px; flex-wrap: wrap; flex: 1; }
+.filter-pill {
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 5px 11px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-display);
+  font-size: 11px; font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all .15s;
+}
+.filter-pill:hover { border-color: var(--border-strong); color: var(--ink); }
+.filter-pill.active { color: #fff; border-color: transparent; }
+.filter-pill .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+
+.clear-btn {
+  padding: 7px 14px; border-radius: var(--radius-sm);
+  border: 1.5px solid #FECACA;
+  background: #FEF2F2; color: #DC2626;
+  font-family: var(--font-display); font-size: 12px; font-weight: 600;
+  cursor: pointer; transition: all .15s; display: none;
+}
+.clear-btn:hover { background: #FEE2E2; }
+
+/* ─── Main card (chart) ────────────────────────────────────────────────────── */
+.chart-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  padding: 24px 16px 20px;
+  box-shadow: var(--shadow);
+  overflow-x: auto;
+}
+
+/* Quadrant labels */
+.quad-labels {
+  display: flex;
+  justify-content: center;
+  margin-bottom: 6px;
+}
+.quad-label-inner {
+  display: flex;
+  gap: 0;
+}
+.quad-lbl {
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  padding: 0 8px;
+}
+.quad-lbl.right { text-align: right; }
+.quad-lbl.left  { text-align: left; }
+
+/* Arch container */
+.arch-wrap {
+  display: flex;
+  justify-content: center;
+}
+.arch-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 0;
+}
+.arch-row.lower { align-items: flex-start; }
+
+.quad { display: flex; gap: 2px; }
+
+/* Midline */
+.midline {
+  width: 1.5px;
+  background: linear-gradient(to bottom, transparent, var(--border-strong), transparent);
+  margin: 0 5px;
+  border-radius: 1px;
+  flex-shrink: 0;
+}
+
+/* Arch separator */
+.arch-sep-wrap {
+  display: flex; justify-content: center;
+  margin: 8px 0;
+}
+.arch-sep {
+  height: 1px;
+  background: var(--border);
+  width: 90%;
+  border-radius: 1px;
+  position: relative;
+}
+.arch-sep::before {
+  content: 'FDI';
+  position: absolute;
+  left: 50%; transform: translateX(-50%) translateY(-50%);
+  background: var(--surface);
+  padding: 0 8px;
+  font-size: 9px;
+  letter-spacing: .12em;
+  color: var(--ink-faint);
+  font-weight: 600;
+  top: 50%;
+}
+
+/* Tooth column */
+.tooth-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  position: relative;
+}
+.tooth-num {
+  font-family: var(--font-mono);
+  font-size: 9px;
+  color: var(--ink-faint);
+  line-height: 1;
+  transition: color .15s;
+}
+.tooth-col:hover .tooth-num { color: var(--accent); }
+.tooth-col.selected .tooth-num { color: var(--accent); font-weight: 500; }
+.tooth-col.dimmed { opacity: .18; transition: opacity .2s; }
+
+/* SVG tooth */
+.tooth-svg {
+  display: block;
+  overflow: visible;
+  cursor: pointer;
+  transition: transform .15s;
+}
+.tooth-svg:hover { transform: scale(1.08); }
+.tooth-svg.extracted { cursor: not-allowed; }
+.tooth-svg.extracted:hover { transform: none; }
+
+/* ─── Legend ───────────────────────────────────────────────────────────────── */
+.legend-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 16px;
+  padding: 14px 16px;
+  background: var(--surface-2);
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+}
+.legend-group { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-muted); font-weight: 500; }
+.legend-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.legend-sep { width: 1px; height: 14px; background: var(--border); margin: 0 4px; }
+.status-legend { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+.status-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--ink-muted); font-weight: 500; }
+.status-dot { width: 8px; height: 8px; border-radius: 50%; }
+
+/* ─── Detail Panel ─────────────────────────────────────────────────────────── */
+.panel-wrap { margin-top: 16px; }
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-lg);
+  overflow: hidden;
+  animation: panelIn .2s ease;
+}
+@keyframes panelIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.panel-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 22px 16px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.panel-tooth-id {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  color: var(--accent);
+  background: var(--accent-soft);
+  padding: 3px 10px;
+  border-radius: 20px;
+  margin-bottom: 4px;
+  display: inline-block;
+}
+.panel-title { font-size: 16px; font-weight: 700; color: var(--ink); letter-spacing: -.2px; }
+.panel-subtitle { font-size: 12px; color: var(--ink-muted); margin-top: 2px; }
+.panel-close {
+  width: 32px; height: 32px;
+  border-radius: 50%;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--ink-muted);
+  font-size: 18px; line-height: 1;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: all .15s;
+}
+.panel-close:hover { background: var(--surface-3); color: var(--ink); }
+
+.panel-body { padding: 20px 22px; display: flex; flex-direction: column; gap: 18px; }
+
+.field-label {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: .1em;
+  color: var(--ink-faint);
+  margin-bottom: 9px;
+}
+
+/* Condition buttons */
+.cond-grid { display: flex; flex-wrap: wrap; gap: 6px; }
+.cond-btn {
+  padding: 6px 12px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.cond-btn .cond-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+.cond-btn:hover { border-color: var(--border-strong); color: var(--ink); }
+.cond-btn.active { font-weight: 600; }
+
+/* Surface painting grid */
+.surface-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+}
+.surface-item { text-align: center; }
+.surface-lbl { font-size: 10px; font-weight: 700; color: var(--ink-faint); margin-bottom: 5px; letter-spacing: .06em; }
+.surface-select {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 6px 4px;
+  border-radius: var(--radius-sm);
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all .15s;
+  appearance: none;
+  text-align: center;
+}
+.surface-select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* Status buttons */
+.status-grid { display: flex; gap: 8px; flex-wrap: wrap; }
+.status-btn {
+  padding: 6px 14px;
+  border-radius: 20px;
+  border: 1.5px solid var(--border);
+  background: var(--surface-2);
+  font-family: var(--font-display);
+  font-size: 12px; font-weight: 500;
+  color: var(--ink-muted);
+  cursor: pointer;
+  transition: all .15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.status-btn .s-dot { width: 7px; height: 7px; border-radius: 50%; }
+.status-btn.active { font-weight: 600; }
+
+/* Notes */
+.notes-ta {
+  width: 100%;
+  font-family: var(--font-display);
+  font-size: 13px;
+  padding: 11px 14px;
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  background: var(--surface-2);
+  color: var(--ink);
+  resize: vertical;
+  transition: border-color .15s;
+  line-height: 1.6;
+}
+.notes-ta:focus { outline: none; border-color: var(--accent); background: var(--surface); }
+.notes-ta::placeholder { color: var(--ink-faint); }
+
+/* Panel actions */
+.panel-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  padding: 16px 22px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-2);
+}
+.btn-cancel {
+  padding: 9px 20px; border-radius: var(--radius);
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  font-family: var(--font-display); font-size: 13px; font-weight: 600;
+  color: var(--ink-muted); cursor: pointer; transition: all .15s;
+}
+.btn-cancel:hover { background: var(--surface-3); color: var(--ink); }
+.btn-save {
+  padding: 9px 24px; border-radius: var(--radius);
+  border: none;
+  background: var(--accent);
+  font-family: var(--font-display); font-size: 13px; font-weight: 700;
+  color: #fff; cursor: pointer; transition: all .15s;
+  letter-spacing: .02em;
+}
+.btn-save:hover { background: var(--accent-dark); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(14,165,160,.3); }
+.btn-save:active { transform: none; box-shadow: none; }
+
+/* ─── Summary ──────────────────────────────────────────────────────────────── */
+.summary-card {
+  margin-top: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+.summary-header {
+  padding: 13px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.summary-title { font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-muted); }
+.summary-count {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  background: var(--accent-soft);
+  color: var(--accent-dark);
+  padding: 2px 10px;
+  border-radius: 20px;
+  font-weight: 500;
+}
+.summary-body { padding: 6px 0; }
+.summary-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 20px;
+  border-bottom: 1px solid var(--surface-3);
+  transition: background .12s;
+  cursor: pointer;
+}
+.summary-row:last-child { border-bottom: none; }
+.summary-row:hover { background: var(--surface-2); }
+.sum-num {
+  font-family: var(--font-mono);
+  font-size: 12px; font-weight: 500;
+  color: var(--accent);
+  min-width: 32px;
+  background: var(--accent-soft);
+  padding: 2px 7px;
+  border-radius: 6px;
+  text-align: center;
+}
+.sum-name { font-size: 12px; font-weight: 500; color: var(--ink); flex: 1; }
+.sum-cond {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+.sum-status { font-size: 11px; font-weight: 500; }
+.sum-notes { font-size: 11px; color: var(--ink-faint); font-style: italic; max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sum-edit {
+  font-size: 11px; font-weight: 600;
+  padding: 3px 10px; border-radius: 6px;
+  border: 1px solid var(--border);
+  background: none; color: var(--ink-muted);
+  cursor: pointer; transition: all .12s;
+  font-family: var(--font-display);
+}
+.sum-edit:hover { background: var(--surface-3); color: var(--ink); }
+
+/* ─── Empty state ──────────────────────────────────────────────────────────── */
+.empty-hint {
+  text-align: center;
+  padding: 32px;
+  color: var(--ink-faint);
+  font-size: 13px;
+}
+.empty-hint span { font-size: 28px; display: block; margin-bottom: 8px; opacity: .4; }
+
+/* ─── Scrollbar ────────────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border-strong); border-radius: 4px; }
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- Header -->
+  <div class="header">
+    <div class="header-left">
+      <div class="brand">Dentryx · Odontogram</div>
+      <div class="page-title">Dental <span>Chart</span></div>
+    </div>
+    <div class="patient-strip">
+      <div class="patient-avatar">KO</div>
+      <div>
+        <div class="patient-name">Karim Ouazzani Benali</div>
+        <div class="patient-meta">P-20240087 · 34 ans · FDI notation</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toolbar -->
+  <div class="toolbar">
+    <div class="mode-toggle">
+      <button class="mode-btn active" id="btn-adult" onclick="setMode('adult')">Adult</button>
+      <button class="mode-btn" id="btn-child" onclick="setMode('child')">Child</button>
+    </div>
+    <div class="filter-pills" id="filter-pills"></div>
+    <button class="clear-btn" id="clear-btn" onclick="clearSelected()">Clear tooth</button>
+  </div>
+
+  <!-- Chart -->
+  <div class="chart-card">
+    <div class="quad-labels">
+      <div class="quad-label-inner" id="ql-upper"></div>
+    </div>
+    <div class="arch-wrap">
+      <div id="upper-arch" class="arch-row"></div>
+    </div>
+    <div class="arch-sep-wrap"><div class="arch-sep"></div></div>
+    <div class="arch-wrap">
+      <div id="lower-arch" class="arch-row lower"></div>
+    </div>
+    <div class="quad-labels" style="margin-top:6px">
+      <div class="quad-label-inner" id="ql-lower"></div>
+    </div>
+  </div>
+
+  <!-- Legend -->
+  <div class="legend-wrap" id="legend-wrap"></div>
+
+  <!-- Panel -->
+  <div class="panel-wrap" id="panel-wrap"></div>
+
+  <!-- Summary -->
+  <div id="summary-wrap"></div>
+</div>
+
+<script>
+/* ─── Data ─────────────────────────────────────────────────────────────────── */
+const ADULT = {
+  upper: [[18,17,16,15,14,13,12,11],[21,22,23,24,25,26,27,28]],
+  lower: [[48,47,46,45,44,43,42,41],[31,32,33,34,35,36,37,38]]
+};
+const CHILD = {
+  upper: [[55,54,53,52,51],[61,62,63,64,65]],
+  lower: [[85,84,83,82,81],[71,72,73,74,75]]
+};
+
+const TOOTH_NAMES = {
+  18:'3rd molar',17:'2nd molar',16:'1st molar',15:'2nd premolar',14:'1st premolar',13:'Canine',12:'Lateral incisor',11:'Central incisor',
+  21:'Central incisor',22:'Lateral incisor',23:'Canine',24:'1st premolar',25:'2nd premolar',26:'1st molar',27:'2nd molar',28:'3rd molar',
+  31:'Central incisor',32:'Lateral incisor',33:'Canine',34:'1st premolar',35:'2nd premolar',36:'1st molar',37:'2nd molar',38:'3rd molar',
+  41:'Central incisor',42:'Lateral incisor',43:'Canine',44:'1st premolar',45:'2nd premolar',46:'1st molar',47:'2nd molar',48:'3rd molar',
+  55:'2nd molar',54:'1st molar',53:'Canine',52:'Lateral incisor',51:'Central incisor',
+  61:'Central incisor',62:'Lateral incisor',63:'Canine',64:'1st molar',65:'2nd molar',
+  71:'Central incisor',72:'Lateral incisor',73:'Canine',74:'1st molar',75:'2nd molar',
+  81:'Central incisor',82:'Lateral incisor',83:'Canine',84:'1st molar',85:'2nd molar',
+};
+
+const CONDITIONS = [
+  {id:'healthy',   label:'Healthy',       color:'#16A34A', bg:'#DCFCE7', tx:'#166534'},
+  {id:'cavity',    label:'Cavity',        color:'#DC2626', bg:'#FEE2E2', tx:'#991B1B'},
+  {id:'filling',   label:'Filling',       color:'#2563EB', bg:'#DBEAFE', tx:'#1E40AF'},
+  {id:'crown',     label:'Crown',         color:'#7C3AED', bg:'#EDE9FE', tx:'#5B21B6'},
+  {id:'extraction',label:'Extraction',    color:'#6B7280', bg:'#F3F4F6', tx:'#374151'},
+  {id:'devital',   label:'Devitalised',   color:'#D97706', bg:'#FEF3C7', tx:'#92400E'},
+  {id:'implant',   label:'Implant',       color:'#0EA5A0', bg:'#CCFBF1', tx:'#134E4A'},
+  {id:'bridge',    label:'Bridge',        color:'#9333EA', bg:'#F3E8FF', tx:'#6B21A8'},
+  {id:'missing',   label:'Missing',       color:'#374151', bg:'#F9FAFB', tx:'#111827'},
+  {id:'fracture',  label:'Fracture',      color:'#EA580C', bg:'#FFF7ED', tx:'#9A3412'},
+];
+
+const SURFACES = ['mesial','distal','occlusal','buccal','lingual'];
+const SURF_LBL = {mesial:'M',distal:'D',occlusal:'O',buccal:'B',lingual:'L'};
+const STATUS = [
+  {id:'planned',     label:'Planned',      color:'#D97706'},
+  {id:'in_progress', label:'In progress',  color:'#2563EB'},
+  {id:'completed',   label:'Completed',    color:'#16A34A'},
+];
+
+/* ─── State ─────────────────────────────────────────────────────────────────── */
+let mode = 'adult';
+let teeth = ADULT;
+let teethState = {
+  36:{condition:'devital',  treatmentStatus:'in_progress', notes:'Dévitalisation en cours, séance 1/2'},
+  16:{condition:'crown',    treatmentStatus:'completed'},
+  26:{condition:'filling',  treatmentStatus:'completed', notes:'Amalgame composite 2023'},
+  11:{condition:'cavity',   treatmentStatus:'planned',   notes:'Carie débutante à surveiller'},
+  48:{condition:'extraction',treatmentStatus:'completed', notes:'Extraction 2022'},
+  46:{condition:'filling',  treatmentStatus:'completed'},
+};
+let selectedTooth = null;
+let filterCond    = null;
+let editState     = {};
+
+/* ─── Tooth geometry helpers ────────────────────────────────────────────────── */
+function getType(n) {
+  const d = n % 10;
+  if (d===1||d===2) return 'incisor';
+  if (d===3)        return 'canine';
+  if (d===4||d===5) return 'premolar';
+  return 'molar';
+}
+function isChild(n) { return n >= 51 && n <= 85; }
+function crownW(n) {
+  const t = getType(n), c = isChild(n);
+  if (t==='incisor')  return c ? 13 : 14;
+  if (t==='canine')   return c ? 14 : 15;
+  if (t==='premolar') return 16;
+  const d = n%10;
+  if (d===8) return 18;
+  return c ? 20 : 22;
+}
+function crownH(n) {
+  const t = getType(n);
+  if (t==='incisor')  return 20;
+  if (t==='canine')   return 22;
+  if (t==='premolar') return 22;
+  return 24;
+}
+function rootH(n) {
+  const t = getType(n), c = isChild(n);
+  if (t==='incisor')  return c ? 22 : 28;
+  if (t==='canine')   return c ? 24 : 34;
+  if (t==='premolar') return c ? 22 : 28;
+  return c ? 20 : 26;
+}
+function rootCount(n) {
+  const t = getType(n), q = Math.floor(n/10);
+  if (t==='incisor'||t==='canine') return 1;
+  if (t==='premolar') return (q===1||q===2||q===5||q===6) ? 2 : 1;
+  return (q===1||q===2||q===5||q===6) ? 3 : 2;
+}
+
+/* ─── SVG tooth builder ─────────────────────────────────────────────────────── */
+function buildToothSVG(num, isUpper) {
+  const cw = crownW(num), ch = crownH(num), rh = rootH(num), rc = rootCount(num);
+  const t = getType(num);
+  const W = Math.max(cw + 8, 32), H = ch + rh + 16;
+  const cx = W / 2;
+  const crownY    = isUpper ? rh + 2 : 2;
+  const rootBaseY = isUpper ? rh + 2 : 2 + ch;
+
+  const s = teethState[num] || {};
+  const cond = CONDITIONS.find(c => c.id === s.condition);
+  const isExt = s.condition === 'extraction' || s.condition === 'missing';
+  const sel = selectedTooth === num;
+  const dimmed = filterCond && s.condition !== filterCond;
+
+  /* Crown path */
+  let cp = '';
+  const x = cx - cw/2, y = crownY, w = cw, h = ch;
+  if (t==='incisor') cp = `M${x+3},${y} Q${cx},${y-1} ${x+w-3},${y} L${x+w},${y+h} L${x},${y+h}Z`;
+  else if (t==='canine') cp = `M${x+2},${y} Q${cx},${y-3} ${x+w-2},${y} L${x+w},${y+h} L${x},${y+h}Z`;
+  else if (t==='premolar') cp = `M${x+1},${y+2} Q${x+w*.3},${y-2} ${cx},${y} Q${x+w*.7},${y-2} ${x+w-1},${y+2} L${x+w},${y+h} L${x},${y+h}Z`;
+  else cp = `M${x},${y+3} Q${x},${y} ${x+3},${y} L${x+w-3},${y} Q${x+w},${y} ${x+w},${y+3} L${x+w},${y+h} L${x},${y+h}Z`;
+
+  /* Root paths */
+  const rf = cond ? cond.color+'30' : '#E2E8F035';
+  const rs = cond ? cond.color+'70' : '#CBD5E160';
+  let roots = '';
+  if (rc===1) {
+    const ry2 = isUpper ? 2 : rootBaseY + rh;
+    roots = `<path d="M${cx-cw*.22},${rootBaseY} Q${cx-cw*.18},${(rootBaseY+ry2)/2} ${cx},${ry2} Q${cx+cw*.18},${(rootBaseY+ry2)/2} ${cx+cw*.22},${rootBaseY}Z" fill="${rf}" stroke="${rs}" stroke-width="1"/>`;
+  } else if (rc===2) {
+    [-1,1].forEach(side => {
+      const sp2 = cw*.28, rx2 = cx+side*sp2*.7, ex = cx+side*sp2;
+      const ry2 = isUpper ? 2 : rootBaseY + rh;
+      roots += `<path d="M${rx2-cw*.14},${rootBaseY} Q${ex-cw*.12},${(rootBaseY+ry2)/2} ${ex},${ry2} Q${ex+cw*.12},${(rootBaseY+ry2)/2} ${rx2+cw*.14},${rootBaseY}Z" fill="${rf}" stroke="${rs}" stroke-width="1"/>`;
+    });
+  } else {
+    [-1,0,1].forEach((side,i) => {
+      const sp3=cw*.26, ex=cx+side*sp3*1.2, rx3=cx+side*sp3*.9;
+      const ry2=isUpper?(i===1?4:6):rootBaseY+rh-(i===1?4:0);
+      roots += `<path d="M${rx3-cw*.12},${rootBaseY} Q${ex-cw*.1},${(rootBaseY+ry2)/2} ${ex},${ry2} Q${ex+cw*.1},${(rootBaseY+ry2)/2} ${rx3+cw*.12},${rootBaseY}Z" fill="${rf}" stroke="${rs}" stroke-width="1"/>`;
+    });
+  }
+
+  /* 5-surface painting */
+  const mx = cx, my = crownY + ch/2;
+  const ir = Math.min(cw,ch)*.28, or2 = Math.min(cw,ch)*.45;
+  const surfs = {
+    occlusal: `M${mx-ir},${my-ir}L${mx+ir},${my-ir}L${mx+ir},${my+ir}L${mx-ir},${my+ir}Z`,
+    buccal:   `M${mx-or2},${crownY+1}L${mx+or2},${crownY+1}L${mx+ir},${my-ir}L${mx-ir},${my-ir}Z`,
+    lingual:  `M${mx-ir},${my+ir}L${mx+ir},${my+ir}L${mx+or2},${crownY+ch-1}L${mx-or2},${crownY+ch-1}Z`,
+    mesial:   `M${cx-cw/2+1},${crownY+1}L${mx-ir},${my-ir}L${mx-ir},${my+ir}L${cx-cw/2+1},${crownY+ch-1}Z`,
+    distal:   `M${mx+ir},${my-ir}L${cx+cw/2-1},${crownY+1}L${cx+cw/2-1},${crownY+ch-1}L${mx+ir},${my+ir}Z`,
+  };
+  let surfSVG = '';
+  if (!isExt && (t==='molar'||t==='premolar')) {
+    SURFACES.forEach(sf => {
+      const sc = s.surfaces?.[sf];
+      const scc = CONDITIONS.find(c => c.id === sc);
+      if (scc) surfSVG += `<path d="${surfs[sf]}" fill="${scc.color}" opacity="0.82" stroke="${scc.color}44" stroke-width="0.5"/>`;
+    });
+    surfSVG += `<path d="${surfs.occlusal}" fill="none" stroke="${cond ? cond.color+'55':'#CBD5E155'}" stroke-width="0.5"/>`;
+  }
+
+  const fill   = cond ? cond.color : '#FFFFFF';
+  const stroke = cond ? cond.color : '#D1D5DB';
+  const stObj  = STATUS.find(st => st.id === s.treatmentStatus);
+
+  return `<svg class="tooth-svg${isExt?' extracted':''}" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}" onclick="selectTooth(${num})" style="opacity:${dimmed?.2:1};transition:opacity .2s">
+    ${sel ? `<rect x="1" y="1" width="${W-2}" height="${H-2}" rx="6" fill="none" stroke="#0EA5A0" stroke-width="1.8" stroke-dasharray="3 2.5"/>` : ''}
+    ${!isExt ? roots : ''}
+    ${isExt ? `<line x1="${cx-cw/2}" y1="${crownY}" x2="${cx+cw/2}" y2="${crownY+ch}" stroke="#9CA3AF" stroke-width="2.2" stroke-linecap="round"/>
+               <line x1="${cx+cw/2}" y1="${crownY}" x2="${cx-cw/2}" y2="${crownY+ch}" stroke="#9CA3AF" stroke-width="2.2" stroke-linecap="round"/>` : ''}
+    ${!isExt ? `<path d="${cp}" fill="${fill}" stroke="${stroke}" stroke-width="${sel?2:1.5}" stroke-linejoin="round"/>` : ''}
+    ${surfSVG}
+    ${s.condition==='implant' ? `<line x1="${cx}" y1="${crownY}" x2="${cx}" y2="${rootBaseY}" stroke="#0EA5A0" stroke-width="2" stroke-dasharray="2.5 2"/>` : ''}
+    ${stObj ? `<circle cx="${W-5}" cy="5" r="3.8" fill="${stObj.color}" stroke="${fill}" stroke-width="1"/>` : ''}
+  </svg>`;
+}
+
+/* ─── Render functions ──────────────────────────────────────────────────────── */
+function buildToothCol(num, isUpper) {
+  const dimmed = filterCond && (teethState[num]?.condition !== filterCond);
+  const sel = selectedTooth === num;
+  const classes = ['tooth-col', sel ? 'selected' : '', dimmed ? 'dimmed' : ''].filter(Boolean).join(' ');
+  return `<div class="${classes}" id="tc-${num}">
+    ${isUpper ? `<span class="tooth-num">${num}</span>` : ''}
+    ${buildToothSVG(num, isUpper)}
+    ${!isUpper ? `<span class="tooth-num">${num}</span>` : ''}
+  </div>`;
+}
+
+function renderArches() {
+  const ua = document.getElementById('upper-arch');
+  const la = document.getElementById('lower-arch');
+  const qlU = document.getElementById('ql-upper');
+  const qlL = document.getElementById('ql-lower');
+
+  const uMidH = crownH(teeth.upper[0][0]) + rootH(teeth.upper[0][0]) + 16;
+  const lMidH = crownH(teeth.lower[0][0]) + rootH(teeth.lower[0][0]) + 16;
+
+  ua.innerHTML = `
+    <div class="quad">${teeth.upper[0].map(n => buildToothCol(n, true)).join('')}</div>
+    <div class="midline" style="height:${uMidH}px;margin-top:14px"></div>
+    <div class="quad">${teeth.upper[1].map(n => buildToothCol(n, true)).join('')}</div>
+  `;
+  la.innerHTML = `
+    <div class="quad">${teeth.lower[0].map(n => buildToothCol(n, false)).join('')}</div>
+    <div class="midline" style="height:${lMidH}px;margin-bottom:14px"></div>
+    <div class="quad">${teeth.lower[1].map(n => buildToothCol(n, false)).join('')}</div>
+  `;
+
+  const [q1,q2,q3,q4] = mode==='adult'
+    ? ['Q1 — Upper right','Q2 — Upper left','Q4 — Lower right','Q3 — Lower left']
+    : ['Q5 — Upper right','Q6 — Upper left','Q8 — Lower right','Q7 — Lower left'];
+
+  qlU.innerHTML = `
+    <span class="quad-lbl right" style="width:50%">${q1}</span>
+    <span class="quad-lbl left"  style="width:50%">${q2}</span>
+  `;
+  qlL.innerHTML = `
+    <span class="quad-lbl right" style="width:50%">${q3}</span>
+    <span class="quad-lbl left"  style="width:50%">${q4}</span>
+  `;
+}
+
+function renderLegend() {
+  const lg = document.getElementById('legend-wrap');
+  lg.innerHTML = CONDITIONS.map(c =>
+    `<div class="legend-group"><span class="legend-dot" style="background:${c.color}"></span>${c.label}</div>`
+  ).join('') +
+  `<div class="legend-sep"></div>` +
+  `<div class="status-legend">` +
+  STATUS.map(s =>
+    `<div class="status-item"><span class="status-dot" style="background:${s.color}"></span>${s.label}</div>`
+  ).join('') +
+  `</div>`;
+}
+
+function renderFilterPills() {
+  const fp = document.getElementById('filter-pills');
+  const allNums = [...teeth.upper[0],...teeth.upper[1],...teeth.lower[0],...teeth.lower[1]];
+  fp.innerHTML = '';
+  CONDITIONS.forEach(c => {
+    const cnt = allNums.filter(n => teethState[n]?.condition === c.id).length;
+    if (!cnt) return;
+    const active = filterCond === c.id;
+    const btn = document.createElement('button');
+    btn.className = 'filter-pill' + (active ? ' active' : '');
+    btn.style.borderColor = active ? c.color : '';
+    btn.style.background  = active ? c.color : '';
+    btn.style.color       = active ? '#fff'  : '';
+    btn.innerHTML = `<span class="dot" style="background:${active?'#fff':c.color}"></span>${c.label} (${cnt})`;
+    btn.onclick = () => { filterCond = filterCond === c.id ? null : c.id; render(); };
+    fp.appendChild(btn);
+  });
+}
+
+function renderPanel() {
+  const pw = document.getElementById('panel-wrap');
+  if (!selectedTooth) { pw.innerHTML = ''; return; }
+  const num = selectedTooth;
+  const s = editState;
+  const q = Math.floor(num/10);
+  const arch = (q===1||q===2||q===5||q===6) ? 'Upper' : 'Lower';
+  const side = (q===1||q===4||q===5||q===8) ? 'Right' : 'Left';
+  const t = getType(num);
+  const showSurf = t==='molar' || t==='premolar';
+
+  const condHTML = CONDITIONS.map(c => {
+    const active = s.condition === c.id;
+    return `<button class="cond-btn${active?' active':''}" onclick="setCond('${c.id}')"
+      style="border-color:${active?c.color:'var(--border)'};background:${active?c.bg:'var(--surface-2)'};color:${active?c.tx:'var(--ink-muted)'}">
+      <span class="cond-dot" style="background:${c.color}"></span>${c.label}</button>`;
+  }).join('');
+
+  const surfHTML = showSurf ? `
+    <div>
+      <div class="field-label">Surface painting</div>
+      <div class="surface-grid">
+        ${SURFACES.map(sf => {
+          const sc = s.surfaces?.[sf];
+          const scc = CONDITIONS.find(c => c.id === sc);
+          return `<div class="surface-item">
+            <div class="surface-lbl">${SURF_LBL[sf]}</div>
+            <select class="surface-select" onchange="setSurf('${sf}',this.value)"
+              style="border-color:${scc?scc.color:'var(--border)'};background:${scc?scc.bg:'var(--surface-2)'};color:${scc?scc.tx:'var(--ink-muted)'}">
+              <option value="">None</option>
+              ${CONDITIONS.map(c => `<option value="${c.id}"${sc===c.id?' selected':''}>${c.label}</option>`).join('')}
+            </select>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>` : '';
+
+  const stHTML = STATUS.map(st => {
+    const active = s.treatmentStatus === st.id;
+    return `<button class="status-btn${active?' active':''}" onclick="setSt('${st.id}')"
+      style="border-color:${active?st.color:'var(--border)'};background:${active?st.color+'18':'var(--surface-2)'};color:${active?st.color:'var(--ink-muted)'}">
+      <span class="s-dot" style="background:${st.color}"></span>${st.label}</button>`;
+  }).join('');
+
+  pw.innerHTML = `<div class="panel">
+    <div class="panel-header">
+      <div>
+        <div class="panel-tooth-id">#${num}</div>
+        <div class="panel-title">${TOOTH_NAMES[num] || 'Unknown'}</div>
+        <div class="panel-subtitle">${arch} arch · ${side} · ${t.charAt(0).toUpperCase()+t.slice(1)}</div>
+      </div>
+      <button class="panel-close" onclick="closePanel()">×</button>
+    </div>
+    <div class="panel-body">
+      <div>
+        <div class="field-label">Condition</div>
+        <div class="cond-grid">${condHTML}</div>
+      </div>
+      ${surfHTML}
+      <div>
+        <div class="field-label">Treatment status</div>
+        <div class="status-grid">${stHTML}</div>
+      </div>
+      <div>
+        <div class="field-label">Clinical notes</div>
+        <textarea class="notes-ta" rows="3" placeholder="Clinical observations, treatment plan notes…" oninput="editState.notes=this.value">${s.notes||''}</textarea>
+      </div>
+    </div>
+    <div class="panel-actions">
+      <button class="btn-cancel" onclick="closePanel()">Cancel</button>
+      <button class="btn-save" onclick="saveTooth()">Save record</button>
+    </div>
+  </div>`;
+}
+
+function renderSummary() {
+  const sw = document.getElementById('summary-wrap');
+  const allNums = [...teeth.upper[0],...teeth.upper[1],...teeth.lower[0],...teeth.lower[1]];
+  const annotated = allNums.filter(n => teethState[n]?.condition);
+  if (!annotated.length) { sw.innerHTML = ''; return; }
+
+  const rows = annotated.map(n => {
+    const s = teethState[n];
+    const c = CONDITIONS.find(x => x.id === s.condition);
+    const st = STATUS.find(x => x.id === s.treatmentStatus);
+    return `<div class="summary-row" onclick="selectTooth(${n})">
+      <span class="sum-num">#${n}</span>
+      <span class="sum-name">${TOOTH_NAMES[n]||''}</span>
+      ${c ? `<span class="sum-cond" style="background:${c.bg};color:${c.tx};border:1px solid ${c.color}33">${c.label}</span>` : ''}
+      ${st ? `<span class="sum-status" style="color:${st.color}">· ${st.label}</span>` : ''}
+      ${s.notes ? `<span class="sum-notes">"${s.notes}"</span>` : ''}
+      <button class="sum-edit" onclick="event.stopPropagation();selectTooth(${n})">Edit</button>
+    </div>`;
+  }).join('');
+
+  sw.innerHTML = `<div class="summary-card">
+    <div class="summary-header">
+      <span class="summary-title">Annotated teeth</span>
+      <span class="summary-count">${annotated.length} tooth${annotated.length>1?'es':''}</span>
+    </div>
+    <div class="summary-body">${rows}</div>
+  </div>`;
+}
+
+function renderClearBtn() {
+  const cb = document.getElementById('clear-btn');
+  cb.style.display = (selectedTooth && teethState[selectedTooth]?.condition) ? 'block' : 'none';
+}
+
+function render() {
+  renderArches();
+  renderFilterPills();
+  renderPanel();
+  renderSummary();
+  renderClearBtn();
+}
+
+/* ─── Interactions ──────────────────────────────────────────────────────────── */
+function selectTooth(num) {
+  if (selectedTooth === num) { closePanel(); return; }
+  selectedTooth = num;
+  editState = JSON.parse(JSON.stringify(teethState[num] || {}));
+  render();
+  document.getElementById('panel-wrap').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function closePanel() { selectedTooth = null; editState = {}; render(); }
+
+function setCond(id) {
+  editState.condition = editState.condition === id ? undefined : id;
+  renderPanel();
+}
+function setSurf(sf, val) {
+  editState.surfaces = editState.surfaces || {};
+  editState.surfaces[sf] = val || undefined;
+  renderPanel();
+}
+function setSt(id) {
+  editState.treatmentStatus = editState.treatmentStatus === id ? undefined : id;
+  renderPanel();
+}
+
+function saveTooth() {
+  if (!selectedTooth) return;
+  if (editState.condition) {
+    teethState[selectedTooth] = JSON.parse(JSON.stringify(editState));
+  } else {
+    delete teethState[selectedTooth];
+  }
+  closePanel();
+}
+
+function clearSelected() {
+  if (selectedTooth) { delete teethState[selectedTooth]; closePanel(); }
+}
+
+function setMode(m) {
+  mode = m; teeth = m==='adult' ? ADULT : CHILD;
+  selectedTooth = null; editState = {}; filterCond = null;
+  document.getElementById('btn-adult').classList.toggle('active', m==='adult');
+  document.getElementById('btn-child').classList.toggle('active', m==='child');
+  render();
+}
+
+/* ─── Init ──────────────────────────────────────────────────────────────────── */
+renderLegend();
+render();
+</script>
+</body>
+</html>
