@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Dossier Patient — Karim Ouazzani Benali</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Fraunces:ital,wght@0,300;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --teal:#0D9488;--teal-light:#CCFBF1;--teal-dark:#0F766E;
+    --ink:#111827;--ink-muted:#6B7280;--ink-faint:#9CA3AF;
+    --surface:#FFFFFF;--surface-2:#F9FAFB;--surface-3:#F3F4F6;
+    --border:#E5E7EB;
+    --radius:10px;--radius-lg:14px;
+    --red:#DC2626;--amber:#D97706;--blue:#2563EB;--purple:#7C3AED;--green:#16A34A;
+  }
+  body{font-family:'DM Sans',sans-serif;color:var(--ink);background:var(--surface-2);font-size:13px}
+
+  .topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 24px;height:56px;display:flex;align-items:center;gap:14px}
+  .back-btn{display:flex;align-items:center;gap:6px;color:var(--ink-muted);font-size:13px;cursor:pointer;background:none;border:none;font-family:inherit;padding:6px 10px;border-radius:8px}
+  .back-btn:hover{background:var(--surface-3)}
+  .breadcrumb{color:var(--ink-faint);font-size:12px}
+  .patient-chip{display:flex;align-items:center;gap:8px;margin-left:auto}
+  .patient-avatar{width:30px;height:30px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:500}
+  .patient-name-small{font-size:13px;font-weight:500}
+  .tab-bar{display:flex;gap:2px;padding:0 24px;background:var(--surface);border-bottom:1px solid var(--border)}
+  .tab{padding:10px 16px;font-size:13px;color:var(--ink-muted);cursor:pointer;background:none;border:none;border-bottom:2px solid transparent;font-family:inherit;transition:all .15s}
+  .tab:hover{color:var(--ink)}
+  .tab.active{color:var(--teal-dark);border-bottom-color:var(--teal);font-weight:500}
+
+  .layout{display:grid;grid-template-columns:300px 1fr;min-height:calc(100vh - 100px)}
+  .sidebar-panel{background:var(--surface);border-right:1px solid var(--border);overflow-y:auto}
+  .main-panel{padding:20px;overflow-y:auto;display:flex;flex-direction:column;gap:16px}
+
+  .patient-header{padding:20px;border-bottom:1px solid var(--border)}
+  .patient-avatar-lg{width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,var(--teal),var(--teal-dark));color:#fff;display:flex;align-items:center;justify-content:center;font-size:18px;font-weight:500;margin-bottom:12px}
+  .patient-full-name{font-family:'Fraunces',serif;font-size:18px;font-weight:300;color:var(--ink);margin-bottom:2px}
+  .patient-info-row{display:flex;gap:8px;align-items:center;margin-top:6px;flex-wrap:wrap}
+  .info-chip{font-size:11px;background:var(--surface-3);border:1px solid var(--border);padding:3px 8px;border-radius:20px;color:var(--ink-muted)}
+  .info-chip.alert{background:#FEE2E2;border-color:#FECACA;color:#B91C1C}
+
+  .sidebar-section{padding:14px 18px;border-bottom:1px solid var(--border)}
+  .section-label{font-size:10px;font-weight:500;text-transform:uppercase;letter-spacing:.1em;color:var(--ink-faint);margin-bottom:10px}
+  .info-row{display:flex;justify-content:space-between;align-items:flex-start;padding:4px 0;gap:8px}
+  .info-key{font-size:12px;color:var(--ink-muted)}
+  .info-val{font-size:12px;color:var(--ink);font-weight:500;text-align:right;max-width:140px}
+  .tag-list{display:flex;flex-wrap:wrap;gap:5px;margin-top:4px}
+  .tag{font-size:11px;padding:3px 8px;border-radius:20px}
+  .tag.red{background:#FEE2E2;color:#B91C1C;border:1px solid #FECACA}
+  .tag.amber{background:#FEF3C7;color:#92400E;border:1px solid #FDE68A}
+  .tag.blue{background:#DBEAFE;color:#1E40AF;border:1px solid #BFDBFE}
+  .tag.green{background:#DCFCE7;color:#166534;border:1px solid #BBF7D0}
+
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+  .card-header{padding:13px 18px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between}
+  .card-title{font-size:13px;font-weight:500}
+  .card-action{font-size:12px;color:var(--teal);cursor:pointer;background:none;border:none;font-family:inherit}
+  .card-action:hover{text-decoration:underline}
+
+  .odontogram-wrap{padding:16px 20px 20px}
+  .odonto-legend{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px}
+  .legend-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--ink-muted);cursor:pointer;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--surface-2);transition:all .15s;user-select:none}
+  .legend-item.selected{border-color:currentColor;background:currentColor;color:#fff!important}
+  .legend-item.selected .legend-dot{background:#fff!important}
+  .legend-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
+  .odonto-svg{width:100%;overflow:visible}
+  .arch-label{font-family:'DM Sans',sans-serif;font-size:11px;fill:#9CA3AF;font-weight:400}
+  .tooth-num{font-family:'DM Sans',sans-serif;font-size:9px;text-anchor:middle;fill:#9CA3AF;pointer-events:none}
+  .tooth-body{stroke-width:1.5;transition:all .2s;cursor:pointer}
+  .tooth-root{fill:none;stroke-width:1.2;transition:all .2s}
+  .tooth-group{cursor:pointer}
+  .tooth-group:hover .tooth-body{stroke-width:2;filter:brightness(.88)}
+
+  .tooth-tooltip{position:fixed;background:var(--ink);color:#fff;border-radius:8px;padding:10px 14px;font-size:12px;pointer-events:none;z-index:999;opacity:0;transition:opacity .15s;min-width:160px;max-width:220px}
+  .tooltip-tooth{font-weight:500;font-size:13px;margin-bottom:4px}
+
+  .modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:200;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .2s}
+  .modal-overlay.open{opacity:1;pointer-events:all}
+  .modal{background:var(--surface);border-radius:var(--radius-lg);padding:24px;width:340px;transform:translateY(8px);transition:transform .2s}
+  .modal-overlay.open .modal{transform:translateY(0)}
+  .modal-title{font-family:'Fraunces',serif;font-size:17px;font-weight:300;margin-bottom:4px}
+  .modal-sub{font-size:12px;color:var(--ink-muted);margin-bottom:18px}
+  .condition-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:18px}
+  .cond-btn{padding:10px;border-radius:8px;border:1.5px solid var(--border);background:var(--surface-2);cursor:pointer;font-family:inherit;font-size:12px;font-weight:500;transition:all .15s;text-align:center}
+  .cond-btn:hover{transform:scale(1.03)}
+  .cond-btn.active{border-color:currentColor}
+  .modal-actions{display:flex;gap:8px;justify-content:flex-end}
+  .btn-sm{padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border);background:var(--surface-2);font-family:inherit}
+  .btn-sm.primary{background:var(--teal);color:#fff;border-color:var(--teal)}
+  .btn-sm:hover{opacity:.88}
+  .notes-input{width:100%;border:1px solid var(--border);border-radius:8px;padding:8px 10px;font-size:12px;resize:vertical;font-family:inherit;color:var(--ink);background:var(--surface);margin-bottom:14px}
+  .notes-input:focus{outline:none;border-color:var(--teal)}
+
+  .appt-row{display:flex;align-items:center;gap:10px;padding:10px 18px;border-bottom:1px solid var(--surface-3);cursor:pointer}
+  .appt-row:hover{background:var(--surface-2)}
+  .appt-row:last-child{border-bottom:none}
+  .appt-date{font-size:12px;font-weight:500;min-width:80px}
+  .appt-desc{font-size:12px;color:var(--ink-muted);flex:1}
+  .appt-amount{font-size:12px;font-weight:500;color:var(--teal-dark)}
+  .status-dot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+
+  .two-col-sm{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+</style>
+</head>
+<body>
+
+<!-- Tooth Tooltip -->
+<div class="tooth-tooltip" id="tooltip"></div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div class="modal-title" id="modal-title">Dent #16</div>
+    <div class="modal-sub" id="modal-sub">Première molaire supérieure droite</div>
+    <div class="condition-grid" id="cond-grid"></div>
+    <textarea class="notes-input" id="modal-notes" rows="2" placeholder="Notes cliniques…"></textarea>
+    <div class="modal-actions">
+      <button class="btn-sm" onclick="closeModal()">Annuler</button>
+      <button class="btn-sm primary" onclick="saveCondition()">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <button class="back-btn">← Retour</button>
+  <span class="breadcrumb">Patients / Dossier patient</span>
+  <div class="patient-chip">
+    <div class="patient-avatar">KO</div>
+    <span class="patient-name-small">Karim Ouazzani Benali</span>
+  </div>
+</div>
+<div class="tab-bar">
+  <button class="tab active">Vue d'ensemble</button>
+  <button class="tab">Odontogramme</button>
+  <button class="tab">Rendez-vous</button>
+  <button class="tab">Facturation</button>
+  <button class="tab">Prescriptions</button>
+  <button class="tab">Fichiers</button>
+</div>
+
+<div class="layout">
+  <!-- LEFT PANEL -->
+  <div class="sidebar-panel">
+    <div class="patient-header">
+      <div class="patient-avatar-lg">KO</div>
+      <div class="patient-full-name">Karim Ouazzani Benali</div>
+      <div class="patient-info-row">
+        <span class="info-chip">34 ans · M</span>
+        <span class="info-chip">ID: P-20240087</span>
+        <span class="info-chip alert">⚠ Allergie pénicilline</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">Informations personnelles</div>
+      <div class="info-row"><span class="info-key">Téléphone</span><span class="info-val">+212 661 234 567</span></div>
+      <div class="info-row"><span class="info-key">Email</span><span class="info-val">k.ouazzani@gmail.com</span></div>
+      <div class="info-row"><span class="info-key">Né le</span><span class="info-val">15 Mars 1991</span></div>
+      <div class="info-row"><span class="info-key">Adresse</span><span class="info-val">12 Rue Ibn Batouta, Rabat</span></div>
+      <div class="info-row"><span class="info-key">Mutuelle</span><span class="info-val">CNOPS — N°441234</span></div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">Antécédents médicaux</div>
+      <div class="tag-list">
+        <span class="tag red">Allergie pénicilline</span>
+        <span class="tag amber">Hypertension légère</span>
+        <span class="tag blue">Diabète type 2</span>
+      </div>
+      <div style="margin-top:10px;font-size:12px;color:var(--ink-muted);line-height:1.6">Traitement antihypertenseur (Amlodipine 5mg/j). Glycémie sous contrôle. Anticoagulant: non.</div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">Antécédents dentaires</div>
+      <div class="tag-list">
+        <span class="tag green">Extraction #48 (2022)</span>
+        <span class="tag amber">Dévitalisation #36 (2023)</span>
+        <span class="tag blue">Couronne #36 (2023)</span>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">Prochain rendez-vous</div>
+      <div style="background:var(--teal-light);border:1px solid var(--teal);border-radius:var(--radius);padding:10px 12px">
+        <div style="font-size:12px;font-weight:500;color:var(--teal-dark)">Aujourd'hui · 09:45</div>
+        <div style="font-size:12px;color:var(--teal-dark);margin-top:2px">Dévitalisation — Dent #36</div>
+        <div style="font-size:11px;color:var(--teal);margin-top:2px">Dr. Amrani · 45 minutes</div>
+      </div>
+    </div>
+
+    <div class="sidebar-section">
+      <div class="section-label">Résumé financier</div>
+      <div class="info-row"><span class="info-key">Total facturé</span><span class="info-val" style="color:var(--ink);font-weight:500">4 850 MAD</span></div>
+      <div class="info-row"><span class="info-key">Payé</span><span class="info-val" style="color:var(--green)">3 200 MAD</span></div>
+      <div class="info-row"><span class="info-key">Solde dû</span><span class="info-val" style="color:var(--red)">1 650 MAD</span></div>
+    </div>
+  </div>
+
+  <!-- MAIN PANEL -->
+  <div class="main-panel">
+
+    <!-- ODONTOGRAM CARD -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Odontogramme interactif</span>
+        <div style="display:flex;gap:8px;align-items:center">
+          <span style="font-size:11px;color:var(--ink-muted)">Cliquez sur une dent pour enregistrer un état</span>
+          <button class="card-action" onclick="window.print()">Imprimer</button>
+        </div>
+      </div>
+      <div class="odontogram-wrap">
+        <div class="odonto-legend" id="legend-bar"></div>
+        <svg class="odonto-svg" viewBox="0 0 680 310" id="odonto-svg"></svg>
+        <div id="selected-info" style="margin-top:12px;padding:10px 14px;background:var(--surface-2);border-radius:8px;font-size:12px;color:var(--ink-muted);display:none"></div>
+      </div>
+    </div>
+
+    <!-- Appointments + Billing -->
+    <div class="two-col-sm">
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Historique rendez-vous</span>
+          <button class="card-action">+ RDV</button>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:var(--teal)"></div>
+          <div class="appt-date">01/04/2026</div>
+          <div class="appt-desc">Dévitalisation #36</div>
+          <span style="font-size:10px;background:#DCFCE7;color:#166534;padding:2px 7px;border-radius:20px">Aujourd'hui</span>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:#9CA3AF"></div>
+          <div class="appt-date">12/02/2026</div>
+          <div class="appt-desc">Détartrage complet</div>
+          <span style="font-size:10px;background:var(--surface-3);color:var(--ink-muted);padding:2px 7px;border-radius:20px">Terminé</span>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:#9CA3AF"></div>
+          <div class="appt-date">05/11/2025</div>
+          <div class="appt-desc">Pose couronne #36</div>
+          <span style="font-size:10px;background:var(--surface-3);color:var(--ink-muted);padding:2px 7px;border-radius:20px">Terminé</span>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:#9CA3AF"></div>
+          <div class="appt-date">18/09/2025</div>
+          <div class="appt-desc">Dévitalisation #36</div>
+          <span style="font-size:10px;background:var(--surface-3);color:var(--ink-muted);padding:2px 7px;border-radius:20px">Terminé</span>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:#9CA3AF"></div>
+          <div class="appt-date">03/06/2025</div>
+          <div class="appt-desc">Bilan + radio panoramique</div>
+          <span style="font-size:10px;background:var(--surface-3);color:var(--ink-muted);padding:2px 7px;border-radius:20px">Terminé</span>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <span class="card-title">Facturation</span>
+          <button class="card-action">+ Facture</button>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:var(--amber)"></div>
+          <div class="appt-date">01/04/2026</div>
+          <div class="appt-desc">Dévitalisation #36</div>
+          <span class="appt-amount" style="color:var(--amber)">1 650 MAD</span>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:var(--teal)"></div>
+          <div class="appt-date">12/02/2026</div>
+          <div class="appt-desc">Détartrage</div>
+          <span class="appt-amount">450 MAD ✓</span>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:var(--teal)"></div>
+          <div class="appt-date">05/11/2025</div>
+          <div class="appt-desc">Couronne céramique</div>
+          <span class="appt-amount">2 200 MAD ✓</span>
+        </div>
+        <div class="appt-row">
+          <div class="status-dot" style="background:var(--teal)"></div>
+          <div class="appt-date">18/09/2025</div>
+          <div class="appt-desc">Dévitalisation</div>
+          <span class="appt-amount">550 MAD ✓</span>
+        </div>
+        <div style="padding:10px 18px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
+          <span style="font-size:12px;color:var(--ink-muted)">Solde impayé</span>
+          <span style="font-size:13px;font-weight:600;color:var(--red)">1 650 MAD</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Treatment Plan -->
+    <div class="card">
+      <div class="card-header">
+        <span class="card-title">Plan de traitement actif</span>
+        <button class="card-action">+ Étape</button>
+      </div>
+      <div style="padding:14px 18px;display:flex;flex-direction:column;gap:10px">
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--teal-light);border:1px solid var(--teal);border-radius:var(--radius)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--teal);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">1</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500;color:var(--teal-dark)">Dévitalisation #36 — en cours</div><div style="font-size:11px;color:var(--teal)">Aujourd'hui · Séance 1/2</div></div>
+          <span style="font-size:11px;background:var(--teal);color:#fff;padding:3px 9px;border-radius:20px">En cours</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--ink-muted);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">2</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">Obturation #36 — mise en forme canalaire</div><div style="font-size:11px;color:var(--ink-muted)">Prévue · Séance 2/2</div></div>
+          <span style="font-size:11px;background:var(--surface-3);color:var(--ink-muted);padding:3px 9px;border-radius:20px">Planifié</span>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;padding:10px 14px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius)">
+          <div style="width:28px;height:28px;border-radius:50%;background:var(--border);color:var(--ink-muted);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;flex-shrink:0">3</div>
+          <div style="flex:1"><div style="font-size:13px;font-weight:500">Couronne de protection #36</div><div style="font-size:11px;color:var(--ink-muted)">Après obturation · estimation 2-3 semaines</div></div>
+          <span style="font-size:11px;background:var(--surface-3);color:var(--ink-muted);padding:3px 9px;border-radius:20px">À venir</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+const CONDITIONS = [
+  {id:'healthy', label:'Saine',      color:'#16A34A'},
+  {id:'cavity',  label:'Carie',      color:'#DC2626'},
+  {id:'filling', label:'Obturation', color:'#2563EB'},
+  {id:'crown',   label:'Couronne',   color:'#7C3AED'},
+  {id:'extract', label:'Extraction', color:'#6B7280'},
+  {id:'devital', label:'Dévitalisé', color:'#D97706'},
+  {id:'implant', label:'Implant',    color:'#0D9488'},
+  {id:'missing', label:'Absente',    color:'#111827'},
+];
+
+const TOOTH_NAMES = {
+  18:'3e molaire sup.D',17:'2e molaire sup.D',16:'1e molaire sup.D',15:'2e prémolaire sup.D',
+  14:'1e prémolaire sup.D',13:'Canine sup.D',12:'2e incisive sup.D',11:'1e incisive sup.D',
+  21:'1e incisive sup.G',22:'2e incisive sup.G',23:'Canine sup.G',24:'1e prémolaire sup.G',
+  25:'2e prémolaire sup.G',26:'1e molaire sup.G',27:'2e molaire sup.G',28:'3e molaire sup.G',
+  48:'3e molaire inf.D',47:'2e molaire inf.D',46:'1e molaire inf.D',45:'2e prémolaire inf.D',
+  44:'1e prémolaire inf.D',43:'Canine inf.D',42:'2e incisive inf.D',41:'1e incisive inf.D',
+  31:'1e incisive inf.G',32:'2e incisive inf.G',33:'Canine inf.G',34:'1e prémolaire inf.G',
+  35:'2e prémolaire inf.G',36:'1e molaire inf.G',37:'2e molaire inf.G',38:'3e molaire inf.G',
+};
+
+const teethState = {
+  36:{condition:'devital', notes:'Dévitalisation en cours, séance 1/2'},
+  48:{condition:'extract', notes:'Extraction 2022, cicatrisé'},
+  16:{condition:'crown',   notes:'Couronne posée 2021'},
+  26:{condition:'filling', notes:'Obturation composite 2023'},
+  11:{condition:'cavity',  notes:'Carie débutante à surveiller'},
+  46:{condition:'filling', notes:'Amalgame ancien'},
+};
+
+let selectedCondition = null;
+let activeTooth = null;
+
+// Legend
+const legendBar = document.getElementById('legend-bar');
+CONDITIONS.forEach(c => {
+  const el = document.createElement('div');
+  el.className = 'legend-item';
+  el.style.color = c.color;
+  el.innerHTML = `<div class="legend-dot" style="background:${c.color}"></div>${c.label}`;
+  el.onclick = () => {
+    document.querySelectorAll('.legend-item').forEach(x=>x.classList.remove('selected'));
+    if(selectedCondition===c.id){selectedCondition=null;}
+    else{selectedCondition=c.id;el.classList.add('selected');}
+  };
+  legendBar.appendChild(el);
+});
+
+const svg = document.getElementById('odonto-svg');
+const CENTER_X = 340;
+const MID_GAP = 4;
+const CROWN_Y_UPPER = 60;
+const CROWN_H = 30;
+const CROWN_Y_LOWER = 190;
+
+function toothWidth(num){
+  const n=num%10;
+  if(n===6||n===7)return 26;
+  if(n===8)return 22;
+  if(n===5)return 20;
+  if(n===4)return 18;
+  if(n===3)return 17;
+  return 14;
+}
+function toothRootH(num){
+  const n=num%10;
+  if(n===1||n===2)return 28;
+  if(n===3)return 36;
+  if(n===6||n===7)return 30;
+  return 28;
+}
+function getColor(num){
+  const s=teethState[num];
+  if(!s)return '#FFFFFF';
+  const c=CONDITIONS.find(x=>x.id===s.condition);
+  return c?c.color:'#FFFFFF';
+}
+function getStroke(num){
+  const s=teethState[num];
+  if(!s)return '#D1D5DB';
+  const c=CONDITIONS.find(x=>x.id===s.condition);
+  return c?c.color:'#D1D5DB';
+}
+
+function buildTooth(num, cx, isUpper){
+  const tw=toothWidth(num);
+  const rh=toothRootH(num);
+  const fill=getColor(num);
+  const stroke=getStroke(num);
+  const crownY=isUpper?CROWN_Y_UPPER:CROWN_Y_LOWER;
+  const rootDir=isUpper?1:-1;
+  const rootY=crownY+rootDir*CROWN_H;
+
+  const g=document.createElementNS('http://www.w3.org/2000/svg','g');
+  g.setAttribute('class','tooth-group');
+  g.setAttribute('data-tooth',num);
+  g.style.cursor='pointer';
+
+  const root=document.createElementNS('http://www.w3.org/2000/svg','path');
+  const rx1=cx-tw*0.3,rx2=cx+tw*0.3,ry1=rootY,ry2=rootY+rootDir*rh;
+  root.setAttribute('d',`M${rx1},${ry1} Q${cx-tw*0.15},${(ry1+ry2)/2} ${cx},${ry2} Q${cx+tw*0.15},${(ry1+ry2)/2} ${rx2},${ry1}`);
+  root.setAttribute('class','tooth-root');
+  root.setAttribute('stroke',stroke==='#D1D5DB'?'#D1D5DB':stroke);
+  root.setAttribute('fill',fill==='#FFFFFF'?'#FFF8F4':fill+'22');
+  g.appendChild(root);
+
+  const crown=document.createElementNS('http://www.w3.org/2000/svg','rect');
+  crown.setAttribute('x',cx-tw/2);
+  crown.setAttribute('y',isUpper?crownY:crownY-CROWN_H);
+  crown.setAttribute('width',tw);
+  crown.setAttribute('height',CROWN_H);
+  crown.setAttribute('rx','4');
+  crown.setAttribute('class','tooth-body');
+  crown.setAttribute('fill',fill);
+  crown.setAttribute('stroke',stroke);
+  g.appendChild(crown);
+
+  const numTxt=document.createElementNS('http://www.w3.org/2000/svg','text');
+  numTxt.setAttribute('x',cx);
+  numTxt.setAttribute('y',isUpper?crownY-8:crownY+CROWN_H+12);
+  numTxt.setAttribute('class','tooth-num');
+  numTxt.textContent=num;
+  g.appendChild(numTxt);
+
+  g.addEventListener('click',()=>openModal(num,cx));
+  g.addEventListener('mouseenter',(e)=>showTooltip(e,num));
+  g.addEventListener('mouseleave',hideTooltip);
+  return g;
+}
+
+const upperRight=[18,17,16,15,14,13,12,11];
+const upperLeft=[21,22,23,24,25,26,27,28];
+const lowerRight=[48,47,46,45,44,43,42,41];
+const lowerLeft=[31,32,33,34,35,36,37,38];
+
+let xR=CENTER_X-MID_GAP;
+[...upperRight].reverse().forEach(num=>{
+  const tw=toothWidth(num);const cx=xR-tw/2;
+  svg.appendChild(buildTooth(num,cx,true));xR-=(tw+3);
+});
+let xL=CENTER_X+MID_GAP;
+upperLeft.forEach(num=>{
+  const tw=toothWidth(num);const cx=xL+tw/2;
+  svg.appendChild(buildTooth(num,cx,true));xL+=(tw+3);
+});
+let xRL=CENTER_X-MID_GAP;
+[...lowerRight].reverse().forEach(num=>{
+  const tw=toothWidth(num);const cx=xRL-tw/2;
+  svg.appendChild(buildTooth(num,cx,false));xRL-=(tw+3);
+});
+let xLL=CENTER_X+MID_GAP;
+lowerLeft.forEach(num=>{
+  const tw=toothWidth(num);const cx=xLL+tw/2;
+  svg.appendChild(buildTooth(num,cx,false));xLL+=(tw+3);
+});
+
+const midLine=document.createElementNS('http://www.w3.org/2000/svg','line');
+midLine.setAttribute('x1','20');midLine.setAttribute('y1','152');
+midLine.setAttribute('x2','660');midLine.setAttribute('y2','152');
+midLine.setAttribute('stroke','#E5E7EB');midLine.setAttribute('stroke-width','1');
+midLine.setAttribute('stroke-dasharray','4 4');
+svg.insertBefore(midLine,svg.firstChild);
+
+function addLabel(txt,x,y,anchor='middle'){
+  const t=document.createElementNS('http://www.w3.org/2000/svg','text');
+  t.setAttribute('x',x);t.setAttribute('y',y);
+  t.setAttribute('class','arch-label');t.setAttribute('text-anchor',anchor);
+  t.textContent=txt;svg.appendChild(t);
+}
+addLabel('Maxillaire supérieur',340,26);
+addLabel('Mandibule inférieure',340,302);
+addLabel('Q1',20,80,'start');addLabel('Q2',660,80,'end');
+addLabel('Q4',20,230,'start');addLabel('Q3',660,230,'end');
+
+const tooltip=document.getElementById('tooltip');
+function showTooltip(e,num){
+  const s=teethState[num];
+  const cond=s?CONDITIONS.find(x=>x.id===s.condition):null;
+  tooltip.innerHTML=`<div class="tooltip-tooth">Dent #${num}</div><div style="font-size:11px;opacity:.7">${TOOTH_NAMES[num]||''}</div>${cond?`<div style="margin-top:6px;display:flex;align-items:center;gap:6px"><div style="width:8px;height:8px;border-radius:50%;background:${cond.color}"></div><span style="font-size:11px">${cond.label}</span></div>`:'<div style="font-size:11px;margin-top:4px;opacity:.6">Cliquer pour annoter</div>'}${s&&s.notes?`<div style="font-size:11px;margin-top:4px;opacity:.7;font-style:italic">"${s.notes}"</div>`:''}`;
+  tooltip.style.opacity='1';moveTooltip(e);
+}
+function moveTooltip(e){tooltip.style.left=(e.clientX+12)+'px';tooltip.style.top=(e.clientY-10)+'px';}
+function hideTooltip(){tooltip.style.opacity='0';}
+document.addEventListener('mousemove',e=>{if(tooltip.style.opacity==='1')moveTooltip(e);});
+
+function openModal(num){
+  activeTooth=num;
+  document.getElementById('modal-title').textContent=`Dent #${num}`;
+  document.getElementById('modal-sub').textContent=TOOTH_NAMES[num]||'';
+  const existing=teethState[num];
+  document.getElementById('modal-notes').value=existing?.notes||'';
+  const grid=document.getElementById('cond-grid');
+  grid.innerHTML='';
+  CONDITIONS.forEach(c=>{
+    const btn=document.createElement('button');
+    btn.className='cond-btn'+(existing?.condition===c.id?' active':'');
+    btn.style.color=c.color;
+    btn.style.borderColor=existing?.condition===c.id?c.color:'var(--border)';
+    btn.innerHTML=`<div style="width:10px;height:10px;border-radius:50%;background:${c.color};margin:0 auto 5px"></div>${c.label}`;
+    btn.onclick=()=>{
+      grid.querySelectorAll('.cond-btn').forEach(x=>{x.classList.remove('active');x.style.borderColor='var(--border)';});
+      btn.classList.add('active');btn.style.borderColor=c.color;selectedCondition=c.id;
+    };
+    grid.appendChild(btn);
+  });
+  if(existing)selectedCondition=existing.condition;
+  document.getElementById('modal').classList.add('open');
+}
+function closeModal(){document.getElementById('modal').classList.remove('open');activeTooth=null;selectedCondition=null;}
+function saveCondition(){
+  if(!activeTooth)return;
+  const notes=document.getElementById('modal-notes').value;
+  if(selectedCondition)teethState[activeTooth]={condition:selectedCondition,notes};
+  closeModal();refreshTooth(activeTooth);
+}
+function refreshTooth(num){
+  const g=svg.querySelector(`[data-tooth="${num}"]`);if(!g)return;
+  const fill=getColor(num);const stroke=getStroke(num);
+  g.querySelector('.tooth-body').setAttribute('fill',fill);
+  g.querySelector('.tooth-body').setAttribute('stroke',stroke);
+  const root=g.querySelector('.tooth-root');
+  root.setAttribute('stroke',stroke==='#D1D5DB'?'#D1D5DB':stroke);
+  root.setAttribute('fill',fill==='#FFFFFF'?'#FFF8F4':fill+'22');
+}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+</script>
+</body>
+</html>
